@@ -111,11 +111,11 @@ CREATE TABLE `tweets` (
   `local_time` timestamp DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_tweets_user_screen_name` (`user_screen_name`),
-  KEY `idx_tweets_retweeted_status_id` (`retweeted_status_id`),
-  KEY `idx_tweets_retweeted_status_user_id` (`retweeted_status_user_id`),
-  KEY `idx_tweets_in_reply_to_user_id` (`in_reply_to_user_id`),
-  KEY `idx_tweets_in_reply_to_status_id` (`in_reply_to_status_id`),
-  KEY `idx_tweets_user_id` (`user_id`),
+  FOREIGN KEY `idx_tweets_retweeted_status_id` (`retweeted_status_id`) REFERENCES tweets(id),
+  FOREIGN KEY `idx_tweets_retweeted_status_user_id` (`retweeted_status_user_id`) REFERENCES users(id),
+  FOREIGN KEY `idx_tweets_in_reply_to_user_id` (`in_reply_to_user_id`)  REFERENCES users(id),
+  FOREIGN KEY `idx_tweets_in_reply_to_status_id` (`in_reply_to_status_id`) REFERENCES tweets(id),
+  FOREIGN KEY `idx_tweets_user_id` (`user_id`) REFERENCES users(id),
   FULLTEXT KEY `idx_tweets_Oso_text` (`text`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5292305 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
