@@ -172,7 +172,6 @@ class MySQLInserter(object):
 			retweet = tweet['retweeted_status']
 			retweet['created_ts'] = convertRFC822ToDateTime(retweet['created_at'])
 			retweet['user']['created_ts'] = convertRFC822ToDateTime(retweet['user']['created_at'])
-			print "!!!!!!!!!!!!!!!!!!!!!!!! RETWEET"	
 			self.processTweet(retweet)
 
 

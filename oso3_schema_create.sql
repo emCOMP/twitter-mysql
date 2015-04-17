@@ -1,4 +1,4 @@
-
+drop database if exists `oso3`;
 create database `oso3` DEFAULT CHARACTER SET=utf8mb4 DEFAULT COLLATE=utf8mb4_unicode_ci;
 USE `oso3`;
 
