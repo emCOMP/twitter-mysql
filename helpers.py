@@ -104,15 +104,35 @@ class UserManager(object):
 		id = user['id']
 
 		# skip if already in the data
-		#if id in self.inserted_ids
+		#if id in self.inserted_ids:
+		#	print "\n" * 4
+		#	print "user exists already"
 		#	return
+
+		#print "user id: ", id
+		#print "user: ", user
+		#print "tweet", tweet
+
 
 		obj = self.build_obj(user)
 
+		self.do_insert(obj)
 
 
-	def do_insert(self, cursor, obj):
-		self.cursor.execute(REPLACE_USER_STMT, obj)
+
+	def do_insert(self, obj):
+		"""
+		"""
+
+		try:
+			self.cursor.execute(REPLACE_USER_STMT, obj)
+		except Exception, e:
+			print "Exception: ", e
+			print REPLACE_USER_STMT
+			print obj
+
+			raise e
+
 		self.inserted_ids.add(obj["id"])
 
 
@@ -141,7 +161,7 @@ class UserManager(object):
 		"verified": None
 		}
 
-		self.do_insert(self.cursor, obj)
+		self.do_insert(obj)
 
 
 
@@ -277,7 +297,12 @@ class UrlManager(TextRegistryManager):
 		}
 
 	def do_insert(self, obj):
-		self.cursor.execute(INSERT_URL_STMT, obj)
+
+		try:
+			self.cursor.execute(INSERT_URL_STMT, obj)
+		except Exception, e:
+			print "Exception ", e
+			raise e
 		return self.cursor.lastrowid
 
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-INSERT_TWEET_STMT = """INSERT INTO `tweets`
+TWEET_BASE_STMT = """ INTO `tweets`
 (`id`,
 `created_at`,
 `created_ts`,
@@ -41,8 +41,7 @@ VALUES
 %(in_reply_to_user_id)s)
 """
 
-
-INSERT_TWEET_WITH_RETWEET_STMT = """INSERT INTO `tweets`
+TWEET_WITH_RETWEET_BASE_STMT = """ INTO `tweets`
 (`id`,
 `created_at`,
 `created_ts`,
@@ -99,6 +98,13 @@ VALUES
 %(in_reply_to_status_id)s,
 %(in_reply_to_user_id)s
 )"""
+
+
+INSERT_TWEET_STMT = "INSERT" + TWEET_BASE_STMT
+INSERT_TWEET_WITH_RETWEET_STMT = "INSERT" + TWEET_WITH_RETWEET_BASE_STMT
+REPLACE_TWEET_STMT = "REPLACE" + TWEET_BASE_STMT
+REPLACE_TWEET_WITH_RETWEET_STMT = "REPLACE" + TWEET_WITH_RETWEET_BASE_STMT
+
 
 
 
