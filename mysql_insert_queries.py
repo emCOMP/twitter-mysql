@@ -124,6 +124,16 @@ TWEET_SNAPSHOT_BASE_STMT = """ INTO `tweet_snapshots`
 `user_favourites_count`,
 `user_geo_enabled`,
 `user_time_zone`,
+`user_description`,
+`user_location`,
+`user_created_at`,
+`user_created_ts`,
+`user_lang`,
+`user_listed_count`,
+`user_name`,
+`user_url`,
+`user_utc_offset`,
+`user_verified`,
 `retweet_count`,
 `favorite_count`,
 `source`,
@@ -149,6 +159,16 @@ VALUES
 %(user_favourites_count)s,
 %(user_geo_enabled)s,
 %(user_time_zone)s,
+%(user_description)s,
+%(user_location)s,
+%(user_created_at)s,
+%(user_created_ts)s,
+%(user_lang)s,
+%(user_listed_count)s,
+%(user_name)s,
+%(user_url)s,
+%(user_utc_offset)s,
+%(user_verified)s,
 %(retweet_count)s,
 %(favorite_count)s,
 %(source)s,
@@ -177,6 +197,16 @@ TWEET_SNAPSHOT_WITH_RETWEET_BASE_STMT = """ INTO `tweet_snapshots`
 `user_favourites_count`,
 `user_geo_enabled`,
 `user_time_zone`,
+`user_description`,
+`user_location`,
+`user_created_at`,
+`user_created_ts`,
+`user_lang`,
+`user_listed_count`,
+`user_name`,
+`user_url`,
+`user_utc_offset`,
+`user_verified`,
 `retweet_count`,
 `favorite_count`,
 `retweeted_status_id`,
@@ -210,6 +240,16 @@ VALUES
 %(user_favourites_count)s,
 %(user_geo_enabled)s,
 %(user_time_zone)s,
+%(user_description)s,
+%(user_location)s,
+%(user_created_at)s,
+%(user_created_ts)s,
+%(user_lang)s,
+%(user_listed_count)s,
+%(user_name)s,
+%(user_url)s,
+%(user_utc_offset)s,
+%(user_verified)s,
 %(retweet_count)s,
 %(favorite_count)s,
 %(retweeted_status_id)s,
@@ -332,4 +372,123 @@ INSERT_TWEET_MEDIA_STMT = """INSERT INTO `tweet_media` (
 INSERT_URL_STMT = """INSERT INTO `urls` (`url`, `expanded_url`, `display_url`) VALUES (%(url)s, %(expanded_url)s, %(display_url)s ) """
 
 INSERT_TWEET_URL_STMT = """INSERT INTO `tweet_url` (`tweet_id`, `url_id`) VALUES (%(tweet_id)s, %(url_id)s ) """
+
+
+
+INSERT_TWEETS_FROM_SNAPSHOTS_STMT = """
+INSERT INTO tweets (
+`id`,
+`created_at`,
+`created_ts`,
+`lang`,
+`text`,
+`geo_coordinates_0`,
+`geo_coordinates_1`,
+`user_id`,
+`user_screen_name`,
+`user_followers_count`,
+`user_friends_count`,
+`user_statuses_count`,
+`user_favourites_count`,
+`user_geo_enabled`,
+`user_time_zone`,
+`retweet_count`,
+`favorite_count`,
+`retweeted_status_id`,
+`retweeted_status_user_screen_name`,
+`retweeted_status_retweet_count`,
+`retweeted_status_user_id`,
+`retweeted_status_user_time_zone`,
+`retweeted_status_user_friends_count`,
+`retweeted_status_user_statuses_count`,
+`retweeted_status_user_followers_count`,
+`source`,
+`in_reply_to_screen_name`,
+`in_reply_to_status_id`,
+`in_reply_to_user_id`)
+select 
+ts.tweet_id as id, 
+ts.`created_at`,
+ts.`created_ts`,
+ts.`lang`,
+ts.`text`,
+ts.`geo_coordinates_0`,
+ts.`geo_coordinates_1`,
+ts.`user_id`,
+ts.`user_screen_name`,
+ts.`user_followers_count`,
+ts.`user_friends_count`,
+ts.`user_statuses_count`,
+ts.`user_favourites_count`,
+ts.`user_geo_enabled`,
+ts.`user_time_zone`,
+ts.`retweet_count`,
+ts.`favorite_count`,
+ts.`retweeted_status_id`,
+ts.`retweeted_status_user_screen_name`,
+ts.`retweeted_status_retweet_count`,
+ts.`retweeted_status_user_id`,
+ts.`retweeted_status_user_time_zone`,
+ts.`retweeted_status_user_friends_count`,
+ts.`retweeted_status_user_statuses_count`,
+ts.`retweeted_status_user_followers_count`,
+ts.`source`,
+ts.`in_reply_to_screen_name`,
+ts.`in_reply_to_status_id`,
+ts.`in_reply_to_user_id`
+
+from oso3.tweet_snapshots ts
+inner join (select ts1.tweet_id, max(ts1.snapshot_tweet_id) as max_snapshot_tweet_id
+	from oso3.tweet_snapshots ts1
+	group by ts1.tweet_id) gts 
+on gts.tweet_id = ts.tweet_id and gts.max_snapshot_tweet_id = ts.snapshot_tweet_id;
+"""
+
+
+INSERT_USERS_FROM_SNAPSHOTS_STMT = """
+INSERT INTO users (
+`id`, 
+`screen_name`,
+`description`,
+`followers_count`,
+`friends_count`,
+`statuses_count`,
+`favourites_count`,
+`location`,
+`created_at`,
+`created_ts`,
+`geo_enabled`,
+`lang`,
+`listed_count`,
+`name`,
+`time_zone`,
+`url`,
+`utc_offset`,
+`verified`)
+select 
+ts.`user_id` as id, 
+ts.`user_screen_name` as screen_name,
+ts.`user_description` as description,
+ts.`user_followers_count` as followers_count,
+ts.`user_friends_count` as friends_count,
+ts.`user_statuses_count` as statuses_count,
+ts.`user_favourites_count` as favourites_count,
+ts.`user_location` as location,
+ts.`user_created_at` as created_at,
+ts.`user_created_ts` as created_ts,
+ts.`user_geo_enabled` as geo_enabled,
+ts.`user_lang` as lang,
+ts.`user_listed_count` as listed_count,
+ts.`user_name` as name,
+ts.`user_time_zone` as time_zone,
+ts.`user_url` as url,
+ts.`user_utc_offset` as utc_offset,
+ts.`user_verified` as verified
+
+from oso3.tweet_snapshots ts
+inner join (select ts1.user_id, max(ts1.snapshot_tweet_id) as max_snapshot_tweet_id
+	from oso3.tweet_snapshots ts1
+	group by ts1.user_id) gts 
+on gts.user_id = ts.user_id and gts.max_snapshot_tweet_id = ts.snapshot_tweet_id;
+"""
 

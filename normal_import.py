@@ -7,6 +7,7 @@ import io
 from datetime import datetime
 from pprint import pprint
 import os
+import sys
 import argparse
 import getpass
 
@@ -89,8 +90,11 @@ class MySQLInserter(object):
 		self.file = None
 		self.filesize = 0
 
+		# batch updaters
 		self.tweet_snapshot_batch_inserter = MySQLBatchInserter(self.cursor, INSERT_TWEET_SNAPSHOT_STMT)
 		self.tweet_retweet_snapshot_batch_inserter = MySQLBatchInserter(self.cursor, INSERT_TWEET_SNAPSHOT_WITH_RETWEET_STMT)
+
+		
 
 	def __del__(self):
 		""" """
@@ -149,7 +153,7 @@ class MySQLInserter(object):
 		self.processTweetSnapshot(tweet)
 
 		# update the status
-		#self.status_updater.current_val = self.file.tell()
+		#self.status_updater.current_val = self.file.tell()  OMG so slow
 		self.status_updater.current_val = os.lseek(self.file.fileno(), 0, os.SEEK_CUR)
 
 		return line
@@ -180,7 +184,17 @@ class MySQLInserter(object):
 		self.tweet_snapshot_batch_inserter.flush()
 		self.tweet_retweet_snapshot_batch_inserter.flush()
 
+		# update status for user
 		self.status_updater.update(True)
+
+		# populate tweets table
+		print "\npopulating tweets table..."
+		print "(No progress available. Could take minutes.)"
+		self.insert_tweets_from_snapshots()
+
+		print "\npopulating users table..."
+		print "(No progress available. Could take minutes.)"
+		self.insert_users_from_snapshots()
 
 
 	def processTweetSnapshot(self, tweet, snapshot_id = None, snapshot_time = None):
@@ -198,7 +212,7 @@ class MySQLInserter(object):
 		tweet['snapshot_time'] = snapshot_time if snapshot_time is not None else created_ts
 
 		# add user
-		self.user_mgr.add(tweet)
+		#self.user_mgr.add(tweet)
 
 		# add retweet if one exists
 		if 'retweeted_status' in tweet:
@@ -435,6 +449,16 @@ class MySQLInserter(object):
 			"user_favourites_count": user["favourites_count"],
 			"user_geo_enabled": user["geo_enabled"],
 			"user_time_zone": user["time_zone"],
+			"user_description": user["description"],
+			"user_location": user["location"],
+			"user_created_at": user["created_at"],
+			"user_created_ts": user["created_ts"],
+			"user_lang": user["lang"],
+			"user_listed_count": user["listed_count"],
+			"user_name": user["name"],
+			"user_url": user["url"],
+			"user_utc_offset": user["utc_offset"],
+			"user_verified": user["verified"],
 			"source": tweet["source"],
 			"in_reply_to_screen_name": tweet["in_reply_to_screen_name"],
 			"in_reply_to_status_id": tweet["in_reply_to_status_id"],
@@ -458,7 +482,7 @@ class MySQLInserter(object):
 
 		if "retweeted_status" in tweet:
 			batch = self.tweet_retweet_snapshot_batch_inserter
-			#stmt = INSERT_TWEET_STMT
+			#stmt = INSERT_TWEET_SNAPSHOT_WITH_RETWEET_STMT
 			retweet = {
 				"retweeted_status_id": tweet["retweeted_status"]["id"],
 				"retweeted_status_retweet_count": tweet["retweeted_status"]["retweet_count"],
@@ -471,6 +495,7 @@ class MySQLInserter(object):
 			}
 		else:
 			batch = self.tweet_snapshot_batch_inserter
+			#stmt = INSERT_TWEET_SNAPSHOT_STMT
 			retweet = {
 			}
 
@@ -481,7 +506,10 @@ class MySQLInserter(object):
 		#pprint(obj)
 
 		try:
+			#print obj["user_created_ts"], obj["user_created_ts"].microsecond, obj["user_created_ts"].tzinfo
+			#sys.stdout.flush()
 			#self.cursor.execute(stmt, obj)
+			#return 1
 			return batch.insert(obj)
 		except Exception, e:
 			print "Exception: ", e
@@ -489,6 +517,41 @@ class MySQLInserter(object):
 			print "obj: ", repr(obj)
 			raise e
 
+
+	def exec_statement(self, stmt):
+		try:
+			self.cursor.execute(stmt)
+		except Exception, e:
+			print "Exception: ", e
+			#print "SQL: ", stmt
+			print "obj: ", repr(obj)
+			raise e				
+
+
+	def insert_tweets_from_snapshots(self):
+		"""
+		Runs a query after snapshots have been added to generate actual tweets table content using the
+		most recent tweet as deteremined by the snapshot tweet_id. 
+
+		Twitter claims that the ids are k-sorted and they would try to keep them roughly in order within a second,
+		however that was in 2010 and in 2014 they retired their snowflake codebase on github, so it's unclear how it's
+		working
+
+		https://blog.twitter.com/2010/announcing-snowflake
+
+		https://github.com/twitter/snowflake/blob/742afd7d02adcfdafa9fd6a2844de087891fe1a2/README.md
+		"""
+		self.exec_statement(INSERT_TWEETS_FROM_SNAPSHOTS_STMT)
+
+
+	def insert_users_from_snapshots(self):
+		"""
+		runs a query after snapshots have been added to generate the user table content using the
+		most recent tweet as determined by the snapshot tweet_id. See note in the insert_tweets_from_snapshots
+		about this. 
+		"""
+
+		self.exec_statement(INSERT_USERS_FROM_SNAPSHOTS_STMT)
 
 
 

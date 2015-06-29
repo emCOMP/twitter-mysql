@@ -52,7 +52,7 @@ CREATE TABLE `users` (
   `favourites_count` int(11) DEFAULT NULL,
   `location` varchar(512) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` varchar(64) DEFAULT NULL,
-  `created_ts` timestamp NULL DEFAULT NULL,
+  `created_ts` DATETIME NULL DEFAULT NULL,
   `geo_enabled` int(1) default NULL,
   `lang` varchar(8) default NULL,
   `listed_count` int(11) DEFAULT NULL,
@@ -62,7 +62,8 @@ CREATE TABLE `users` (
   `utc_offset` int(11) DEFAULT NULL,
   `verified` int(1) DEFAULT NULL,
 
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `idx_user_screen_name` (`screen_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
@@ -89,11 +90,11 @@ CREATE TABLE `media` (
 CREATE TABLE `tweet_snapshots` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `snapshot_tweet_id` bigint(20) NOT NULL,
-  `snapshot_time` timestamp NOT NULL,
+  `snapshot_time` DATETIME NOT NULL,
 
   `tweet_id` bigint(20) NOT NULL,
   `created_at` varchar(64) DEFAULT NULL,
-  `created_ts` timestamp NULL DEFAULT NULL,
+  `created_ts` DATETIME NULL DEFAULT NULL,
   `lang` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `text` varchar(500) CHARACTER SET utf8mb4 DEFAULT NULL,
   `geo_coordinates_0` varchar(40) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -106,6 +107,16 @@ CREATE TABLE `tweet_snapshots` (
   `user_favourites_count` int(11) DEFAULT NULL,
   `user_geo_enabled` int(1) default NULL,
   `user_time_zone` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_description` varchar(512) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_location` varchar(512) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_created_at` varchar(64) DEFAULT NULL,
+  `user_created_ts` DATETIME NULL DEFAULT NULL,
+  `user_lang` varchar(8) default NULL,
+  `user_listed_count` int(11) DEFAULT NULL,
+  `user_name` varchar(140) DEFAULT NULL,
+  `user_url` varchar(512) DEFAULT NULL,
+  `user_utc_offset` int(11) DEFAULT NULL,
+  `user_verified` int(1) DEFAULT NULL,
   `retweet_count` int(11) DEFAULT NULL,
   `favorite_count` int(11) DEFAULT NULL,
   `retweeted_status_id` bigint(20) DEFAULT NULL,
@@ -121,7 +132,7 @@ CREATE TABLE `tweet_snapshots` (
   `in_reply_to_status_id` bigint(20) DEFAULT NULL,
   `in_reply_to_user_id` bigint(20) DEFAULT NULL,
   `in_set` int(11) DEFAULT NULL,
-  `local_time` timestamp NULL DEFAULT NULL,
+  `local_time` DATETIME NULL DEFAULT NULL,
 
   PRIMARY KEY (`id`),
   KEY `idx_tweets_tweet_id` (`tweet_id`),
@@ -135,7 +146,7 @@ CREATE TABLE `tweet_snapshots` (
 CREATE TABLE `tweets` (
   `id` bigint(20) NOT NULL,
   `created_at` varchar(64) DEFAULT NULL,
-  `created_ts` timestamp NULL DEFAULT NULL,
+  `created_ts` DATETIME NULL DEFAULT NULL,
   `lang` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `text` varchar(500) CHARACTER SET utf8mb4 DEFAULT NULL,
   `geo_coordinates_0` varchar(40) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -164,7 +175,7 @@ CREATE TABLE `tweets` (
   `in_reply_to_status_id` bigint(20) DEFAULT NULL,
   `in_reply_to_user_id` bigint(20) DEFAULT NULL,
   `in_set` int(11) DEFAULT NULL,
-  `local_time` timestamp NULL DEFAULT NULL,
+  `local_time` DATETIME NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_tweets_user_screen_name` (`user_screen_name`),
   KEY `idx_tweets_retweeted_status_id` (`retweeted_status_id`),
