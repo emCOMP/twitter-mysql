@@ -223,7 +223,8 @@ class UserManager(object):
 		"verified": None
 		}
 
-		self.do_insert(obj)
+		#self.do_insert(obj)
+		self.inserted_ids.add(obj["id"])
 
 
 
