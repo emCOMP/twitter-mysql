@@ -105,8 +105,131 @@ INSERT_TWEET_WITH_RETWEET_STMT = "INSERT" + TWEET_WITH_RETWEET_BASE_STMT
 REPLACE_TWEET_STMT = "REPLACE" + TWEET_BASE_STMT
 REPLACE_TWEET_WITH_RETWEET_STMT = "REPLACE" + TWEET_WITH_RETWEET_BASE_STMT
 
+TWEET_SNAPSHOT_BASE_STMT = """ INTO `tweet_snapshots`
+(
+`snapshot_tweet_id`,
+`snapshot_time`,
+`tweet_id`,
+`created_at`,
+`created_ts`,
+`lang`,
+`text`,
+`geo_coordinates_0`,
+`geo_coordinates_1`,
+`user_id`,
+`user_screen_name`,
+`user_followers_count`,
+`user_friends_count`,
+`user_statuses_count`,
+`user_favourites_count`,
+`user_geo_enabled`,
+`user_time_zone`,
+`retweet_count`,
+`favorite_count`,
+`source`,
+`in_reply_to_screen_name`,
+`in_reply_to_status_id`,
+`in_reply_to_user_id`)
+VALUES
+(
+%(snapshot_tweet_id)s,
+%(snapshot_time)s,
+%(tweet_id)s,
+%(created_at)s,
+%(created_ts)s,
+%(lang)s,
+%(text)s,
+%(geo_coordinates_0)s,
+%(geo_coordinates_1)s,
+%(user_id)s,
+%(user_screen_name)s,
+%(user_followers_count)s,
+%(user_friends_count)s,
+%(user_statuses_count)s,
+%(user_favourites_count)s,
+%(user_geo_enabled)s,
+%(user_time_zone)s,
+%(retweet_count)s,
+%(favorite_count)s,
+%(source)s,
+%(in_reply_to_screen_name)s,
+%(in_reply_to_status_id)s,
+%(in_reply_to_user_id)s
+)"""
 
 
+TWEET_SNAPSHOT_WITH_RETWEET_BASE_STMT = """ INTO `tweet_snapshots`
+(
+`snapshot_tweet_id`,
+`snapshot_time`,
+`tweet_id`,
+`created_at`,
+`created_ts`,
+`lang`,
+`text`,
+`geo_coordinates_0`,
+`geo_coordinates_1`,
+`user_id`,
+`user_screen_name`,
+`user_followers_count`,
+`user_friends_count`,
+`user_statuses_count`,
+`user_favourites_count`,
+`user_geo_enabled`,
+`user_time_zone`,
+`retweet_count`,
+`favorite_count`,
+`retweeted_status_id`,
+`retweeted_status_user_screen_name`,
+`retweeted_status_retweet_count`,
+`retweeted_status_user_id`,
+`retweeted_status_user_time_zone`,
+`retweeted_status_user_friends_count`,
+`retweeted_status_user_statuses_count`,
+`retweeted_status_user_followers_count`,
+`source`,
+`in_reply_to_screen_name`,
+`in_reply_to_status_id`,
+`in_reply_to_user_id`)
+VALUES
+(
+%(snapshot_tweet_id)s,
+%(snapshot_time)s,
+%(tweet_id)s,
+%(created_at)s,
+%(created_ts)s,
+%(lang)s,
+%(text)s,
+%(geo_coordinates_0)s,
+%(geo_coordinates_1)s,
+%(user_id)s,
+%(user_screen_name)s,
+%(user_followers_count)s,
+%(user_friends_count)s,
+%(user_statuses_count)s,
+%(user_favourites_count)s,
+%(user_geo_enabled)s,
+%(user_time_zone)s,
+%(retweet_count)s,
+%(favorite_count)s,
+%(retweeted_status_id)s,
+%(retweeted_status_user_screen_name)s,
+%(retweeted_status_retweet_count)s,
+%(retweeted_status_user_id)s,
+%(retweeted_status_user_time_zone)s,
+%(retweeted_status_user_friends_count)s,
+%(retweeted_status_user_statuses_count)s,
+%(retweeted_status_user_followers_count)s,
+%(source)s,
+%(in_reply_to_screen_name)s,
+%(in_reply_to_status_id)s,
+%(in_reply_to_user_id)s
+)"""
+
+INSERT_TWEET_SNAPSHOT_STMT = "INSERT" + TWEET_SNAPSHOT_BASE_STMT
+INSERT_TWEET_SNAPSHOT_WITH_RETWEET_STMT = "INSERT" + TWEET_SNAPSHOT_WITH_RETWEET_BASE_STMT
+REPLACE_TWEET_SNAPSHOT_STMT = "REPLACE" + TWEET_SNAPSHOT_BASE_STMT
+REPLACE_TWEET_SNAPSHOT_WITH_RETWEET_STMT = "REPLACE" + TWEET_SNAPSHOT_WITH_RETWEET_BASE_STMT
 
 
 REPLACE_USER_STMT = """REPLACE INTO `users` (
