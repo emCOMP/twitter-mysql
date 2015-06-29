@@ -272,6 +272,50 @@ REPLACE_TWEET_SNAPSHOT_STMT = "REPLACE" + TWEET_SNAPSHOT_BASE_STMT
 REPLACE_TWEET_SNAPSHOT_WITH_RETWEET_STMT = "REPLACE" + TWEET_SNAPSHOT_WITH_RETWEET_BASE_STMT
 
 
+USER_BASE_STMT = """ INTO `users` (
+`id`, 
+`screen_name`,
+`description`,
+`followers_count`,
+`friends_count`,
+`statuses_count`,
+`favourites_count`,
+`location`,
+`created_at`,
+`created_ts`,
+`geo_enabled`,
+`lang`,
+`listed_count`,
+`name`,
+`time_zone`,
+`url`,
+`utc_offset`,
+`verified`)
+VALUES (
+%(id)s, 
+%(screen_name)s,
+%(description)s,
+%(followers_count)s,
+%(friends_count)s,
+%(statuses_count)s,
+%(favourites_count)s,
+%(location)s,
+%(created_at)s,
+%(created_ts)s,
+%(geo_enabled)s,
+%(lang)s,
+%(listed_count)s,
+%(name)s,
+%(time_zone)s,
+%(url)s,
+%(utc_offset)s,
+%(verified)s
+)"""
+
+INSERT_USER_STMT = "INSERT " + USER_BASE_STMT
+REPLACE_USER_STMT = "REPLACE " + USER_BASE_STMT
+
+
 REPLACE_USER_STMT = """REPLACE INTO `users` (
 `id`, 
 `screen_name`,
@@ -314,7 +358,7 @@ VALUES (
 
 
 
-INSERT_HASHTAG_STMT = """REPLACE INTO `hashtags` (`text`) VALUES (%(text)s)"""
+INSERT_HASHTAG_STMT = """INSERT INTO `hashtags` (`text`) VALUES (%(text)s)"""
 
 
 

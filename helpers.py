@@ -151,6 +151,7 @@ class UserManager(object):
 
 		self.inserted_ids = set()
 		self.cursor = cursor
+		self.batch_inserter = MySQLBatchInserter(self.cursor, INSERT_USER_STMT)
 
 
 	def add(self, tweet):
@@ -175,7 +176,8 @@ class UserManager(object):
 
 		obj = self.build_obj(user)
 
-		self.do_insert(obj)
+		#self.do_insert(obj)
+		self.inserted_ids.add(obj["id"])
 
 
 
@@ -185,6 +187,7 @@ class UserManager(object):
 
 		try:
 			self.cursor.execute(REPLACE_USER_STMT, obj)
+			#self.batch_inserter.insert(obj)
 		except Exception, e:
 			print "Exception: ", e
 			print REPLACE_USER_STMT
@@ -262,6 +265,12 @@ class UserManager(object):
 		"""
 		return (id in self.inserted_ids)
 
+	def flush(self):
+		"""
+		flushes the batch inserter
+		"""
+		self.batch_inserter.flush()
+
 #
 #
 #
@@ -269,7 +278,7 @@ class UserManager(object):
 #
 class TextRegistryManager(object):
 	"""
-
+	Base class of sorts for registry managers
 	"""
 
 	def __init__(self, cursor):
@@ -312,6 +321,39 @@ class TextRegistryManager(object):
 			return self.registry[key]
 
 		return None
+
+	def flush(self):
+		"""
+		Flushes the bath inserter
+		"""
+		raise Exception("Unimplemented do_insert command")
+		#self.batch_inserter.flush()
+
+
+
+class BatchRegistryManager(TextRegistryManager):
+	"""
+	"""
+
+	def __init__(self, cursor, statement):
+		super(BatchRegistryManager, self).__init__(cursor)
+		self.statement = statement
+		self.batch_inserter = MySQLBatchInserter(self.cursor, self.statement)
+
+	def do_insert(self, obj):
+		"""
+		XXX WARNING XXX
+		This is problematic. It can't return the proper ID, because it wouldn't know until the batch is inserted
+		"""
+		self.batch_inserter.insert(obj)
+		return -1
+
+
+	def flush(self):
+		"""
+		Flush the batch inserter
+		"""
+		self.batch_inserter.flush()
 
 
 #

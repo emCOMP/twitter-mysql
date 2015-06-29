@@ -60,12 +60,17 @@ class MySQLInserter(object):
 		self.file = None
 		self.filesize = 0
 
+		self.processed_tweets = set()
+
 		# batch updaters
 		self.tweet_snapshot_batch_inserter = MySQLBatchInserter(self.cursor, INSERT_TWEET_SNAPSHOT_STMT)
 		self.tweet_retweet_snapshot_batch_inserter = MySQLBatchInserter(self.cursor, INSERT_TWEET_SNAPSHOT_WITH_RETWEET_STMT)
 
-		# entities
-		self.mention_batch_inserter = MySQLBatchInserter(self.cursor, INSERT_MENTION_STMT)
+		# entity batch inserters
+		self.tweet_mention_batch_inserter = MySQLBatchInserter(self.cursor, INSERT_MENTION_STMT)
+		self.tweet_hashtag_batch_inserter = MySQLBatchInserter(self.cursor, INSERT_TWEET_HAHSTAG_STMT)
+		self.tweet_url_batch_inserter = MySQLBatchInserter(self.cursor, INSERT_TWEET_URL_STMT)
+		self.tweet_media_batch_inserter = MySQLBatchInserter(self.cursor, INSERT_TWEET_MEDIA_STMT)
 
 
 
@@ -125,6 +130,7 @@ class MySQLInserter(object):
 		# process the tweets from it
 		self.processTweetSnapshot(tweet)
 
+
 		# update the status
 		#self.status_updater.current_val = self.file.tell()  OMG so slow
 		self.status_updater.current_val = os.lseek(self.file.fileno(), 0, os.SEEK_CUR)
@@ -156,6 +162,11 @@ class MySQLInserter(object):
 		# flush the batches
 		self.tweet_snapshot_batch_inserter.flush()
 		self.tweet_retweet_snapshot_batch_inserter.flush()
+
+		self.tweet_mention_batch_inserter.flush()
+		self.tweet_hashtag_batch_inserter.flush()
+		self.tweet_url_batch_inserter.flush()
+		self.tweet_media_batch_inserter.flush()
 
 		# update status for user
 		self.status_updater.update(True)
@@ -196,8 +207,16 @@ class MySQLInserter(object):
 
 
 		# add tweet
+		#cnt = 0
 		cnt = self.insert_snapshot(tweet)
 
+
+		if tweet_id  not in self.processed_tweets:
+			self.processed_tweets.add(tweet_id)
+
+			# add entities
+			#cnt = 1 # temporary
+			self.addEntities(tweet, tweet_id)
 
 		# update total added 
 		self.status_updater.total_added += cnt
@@ -278,7 +297,8 @@ class MySQLInserter(object):
 			}
 
 			try:
-				self.cursor.execute(INSERT_MENTION_STMT, m_obj)
+				#self.cursor.execute(INSERT_MENTION_STMT, m_obj)
+				self.tweet_mention_batch_inserter.insert(m_obj)
 			except Exception, e:
 				print "Exception: ", e
 				print "SQL: ", INSERT_MENTION_STMT
@@ -297,7 +317,9 @@ class MySQLInserter(object):
 			# insert it
 			ht_id = self.hashtag_mgr.add(ht, { u"text": ht })
 
-			self.cursor.execute(INSERT_TWEET_HAHSTAG_STMT, { "tweet_id": tweet_id, "hashtag_id": ht_id })
+			obj = { "tweet_id": tweet_id, "hashtag_id": ht_id }
+			#self.cursor.execute(INSERT_TWEET_HAHSTAG_STMT, obj)
+			self.tweet_hashtag_batch_inserter.insert(obj)
 
 
 
@@ -311,7 +333,9 @@ class MySQLInserter(object):
 
 
 				# insert relation
-				self.cursor.execute(INSERT_TWEET_MEDIA_STMT, { "tweet_id": tweet_id, "media_id": media_id })
+				obj = { "tweet_id": tweet_id, "media_id": media_id }
+				#self.cursor.execute(INSERT_TWEET_MEDIA_STMT, obj)
+				self.tweet_media_batch_inserter.insert(obj)
 
 		
 	def addUrls(self, tweet_id, entities):
@@ -324,7 +348,9 @@ class MySQLInserter(object):
 				url_id = self.url_mgr.add(u["url"], u)
 
 				# insert relation
-				self.cursor.execute(INSERT_TWEET_URL_STMT, { "tweet_id": tweet_id, "url_id": url_id })
+				obj = { "tweet_id": tweet_id, "url_id": url_id }
+				#self.cursor.execute(INSERT_TWEET_URL_STMT, obj)
+				self.tweet_url_batch_inserter.insert(obj)
 
 
 
