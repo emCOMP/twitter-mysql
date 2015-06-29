@@ -523,7 +523,7 @@ class MySQLInserter(object):
 		except Exception, e:
 			print "Exception: ", e
 			#print "SQL: ", stmt
-			print "obj: ", repr(obj)
+			#print "obj: ", repr(obj)
 			raise e				
 
 
