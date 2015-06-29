@@ -13,7 +13,7 @@ import getpass
 from mysql_insert_queries import *
 
 
-
+from helpers import UserManager, HashtagManager, UrlManager, MediaManager, convertRFC822ToDateTime
 
 
 
@@ -37,6 +37,38 @@ class StatusUpdater(object):
 			print "parsed %d tweets (%2.2f%% finished). %d added."%(self.count, progress, self.total_added)
 
 
+class MySQLBatchInserter(object):
+	"""
+	MySQL batch inserter
+	"""
+
+	def __init__(self,cursor, stmt, batchsize=1000):
+		self.cursor = cursor
+		self.stmt = stmt
+		self.batchsize = batchsize
+		self.items = []
+
+	def insert(self, item):
+		"""
+		prepare an item to be inserted
+		"""
+		self.items.append(item)
+
+		# flushs if necessary
+		count = len(self.items)
+		if count >= self.batchsize:
+			self.flush()
+			return count
+
+		return 0
+
+	def flush(self):
+		"""
+		flushes items to the database
+		"""
+		self.cursor.executemany(self.stmt, self.items)
+		self.items = []
+
 
 class MySQLInserter(object):
 	"""
@@ -56,6 +88,9 @@ class MySQLInserter(object):
 
 		self.file = None
 		self.filesize = 0
+
+		self.tweet_snapshot_batch_inserter = MySQLBatchInserter(self.cursor, INSERT_TWEET_SNAPSHOT_STMT)
+		self.tweet_retweet_snapshot_batch_inserter = MySQLBatchInserter(self.cursor, INSERT_TWEET_SNAPSHOT_WITH_RETWEET_STMT)
 
 	def __del__(self):
 		""" """
@@ -79,6 +114,10 @@ class MySQLInserter(object):
 		self.close()
 		self.file = io.open(args.filename, **kwargs)
 
+		# store file descriptor number for better, but less accurate tell function
+		# io.tell on a text file is painfully slow when not in binary mode
+		self.filedescr = self.file.fileno()
+
 		self.status_updater.total_val = self.getFileSize()
 
 	def readLine(self):
@@ -86,14 +125,13 @@ class MySQLInserter(object):
 		line = self.file.readline()
 
 		# update the status
-		self.status_updater.current_val = self.file.tell()
+		#self.status_updater.current_val = self.file.tell()
 
 		return line
 
 
-	def processLine(self):
-		# read and clean line
-		line = self.readLine()
+	def processLine(self, line):
+		# clean line
 		l = line.strip()
 
 		# should be no empty lines, but just in case!
@@ -108,7 +146,11 @@ class MySQLInserter(object):
 			return None
 
 		# process the tweets from it
-		self.processTweet(tweet)			
+		self.processTweetSnapshot(tweet)
+
+		# update the status
+		#self.status_updater.current_val = self.file.tell()
+		self.status_updater.current_val = os.lseek(self.file.fileno(), 0, os.SEEK_CUR)
 
 		return line
 
@@ -119,10 +161,10 @@ class MySQLInserter(object):
 		"""
 		self.open(filename,**kwargs)
 
-		while self.file.tell() < self.filesize:
-			line = self.processLine()
+		for line in self.file:
+			line = self.processLine(line)
 
-			# skip if invalid line
+			# skip bad lines
 			if line is None:
 				continue
 
@@ -134,7 +176,44 @@ class MySQLInserter(object):
 			if args.limit > 0 and self.status_updater.count > args.limit:
 				break
 
+		# flush the batches
+		self.tweet_snapshot_batch_inserter.flush()
+		self.tweet_retweet_snapshot_batch_inserter.flush()
+
 		self.status_updater.update(True)
+
+
+	def processTweetSnapshot(self, tweet, snapshot_id = None, snapshot_time = None):
+		"""
+
+		"""
+		tweet_id = tweet["id"]
+
+		# parse the datetimes
+		created_ts = convertRFC822ToDateTime(tweet['created_at'])
+		tweet['created_ts'] = created_ts
+		tweet['user']['created_ts'] = convertRFC822ToDateTime(tweet['user']['created_at'])
+
+		tweet['snapshot_tweet_id'] = snapshot_id if snapshot_id is not None else tweet_id
+		tweet['snapshot_time'] = snapshot_time if snapshot_time is not None else created_ts
+
+		# add user
+		self.user_mgr.add(tweet)
+
+		# add retweet if one exists
+		if 'retweeted_status' in tweet:
+			retweet = tweet['retweeted_status']
+			retweet['created_ts'] = convertRFC822ToDateTime(retweet['created_at'])
+			retweet['user']['created_ts'] = convertRFC822ToDateTime(retweet['user']['created_at'])
+			self.processTweetSnapshot(retweet, tweet_id, created_ts)
+
+
+		# add tweet
+		cnt = self.insert_snapshot(tweet)
+
+
+		# update total added 
+		self.status_updater.total_added += cnt
 
 
 	def processTweet(self, tweet):
@@ -334,6 +413,83 @@ class MySQLInserter(object):
 			raise e
 
 
+	def insert_snapshot(self, tweet):
+		""" 
+
+		"""
+		user = tweet["user"]
+
+		obj = {
+			"snapshot_tweet_id": tweet["snapshot_tweet_id"],
+			"snapshot_time": tweet["snapshot_time"],
+			"tweet_id": tweet["id"],
+			"created_at": tweet["created_at"],
+			"created_ts": tweet["created_ts"],
+			"lang": tweet["lang"],
+			"text": tweet["text"],
+			"user_id": user["id"],
+			"user_screen_name": user["screen_name"],
+			"user_followers_count": user["followers_count"],
+			"user_friends_count": user["friends_count"],
+			"user_statuses_count": user["statuses_count"],
+			"user_favourites_count": user["favourites_count"],
+			"user_geo_enabled": user["geo_enabled"],
+			"user_time_zone": user["time_zone"],
+			"source": tweet["source"],
+			"in_reply_to_screen_name": tweet["in_reply_to_screen_name"],
+			"in_reply_to_status_id": tweet["in_reply_to_status_id"],
+			"in_reply_to_user_id": tweet["in_reply_to_user_id"],
+			"retweet_count": tweet["retweet_count"],
+			"favorite_count": tweet["favorite_count"]
+		}
+
+
+		if "geo" in obj and "coordinates" in obj["geo"] and len(obj["geo"]["coordinates"]) > 1:
+			geo = {
+				"geo_coordinates_0": tweet["geo"]["coordinates"][0],
+				"geo_coordinates_1": tweet["geo"]["coordinates"][1],		
+			}
+		else:
+			geo = {
+				"geo_coordinates_0": None,
+				"geo_coordinates_1": None
+			}
+
+
+		if "retweeted_status" in tweet:
+			batch = self.tweet_retweet_snapshot_batch_inserter
+			#stmt = INSERT_TWEET_STMT
+			retweet = {
+				"retweeted_status_id": tweet["retweeted_status"]["id"],
+				"retweeted_status_retweet_count": tweet["retweeted_status"]["retweet_count"],
+				"retweeted_status_user_screen_name": tweet["retweeted_status"]["user"]["screen_name"],			
+				"retweeted_status_user_id": tweet["retweeted_status"]["user"]["id"],
+				"retweeted_status_user_time_zone": tweet["retweeted_status"]["user"]["time_zone"],
+				"retweeted_status_user_friends_count": tweet["retweeted_status"]["user"]["friends_count"],
+				"retweeted_status_user_statuses_count": tweet["retweeted_status"]["user"]["statuses_count"],
+				"retweeted_status_user_followers_count": tweet["retweeted_status"]["user"]["followers_count"],
+			}
+		else:
+			batch = self.tweet_snapshot_batch_inserter
+			retweet = {
+			}
+
+
+		obj.update(geo)
+		obj.update(retweet)
+
+		#pprint(obj)
+
+		try:
+			#self.cursor.execute(stmt, obj)
+			return batch.insert(obj)
+		except Exception, e:
+			print "Exception: ", e
+			#print "SQL: ", stmt
+			print "obj: ", repr(obj)
+			raise e
+
+
 
 
 
@@ -355,11 +511,14 @@ parser.add_argument('--db-encoding', default="utf8mb4", help="database encoding"
 #parser.add_argument('-b', '--batchsize', default=1000, type=int, help="batch insert size")
 parser.add_argument('-c', '--check', dest="check", action="store_true", help="check if tweet exists before inserting")
 parser.add_argument('-r', '--no_retweets', dest="no_retweets", action="store_true", help="do not add embedded retweets")
+parser.add_argument('-p', '--password', help="password for database. if not specified, will prompt.")
 args = parser.parse_args()
 
 
-
-password = getpass.getpass("Enter password for %s@%s (%s) : "%(args.username, args.host, args.database))
+if args.password is None:
+	password = getpass.getpass("Enter password for %s@%s (%s) : "%(args.username, args.host, args.database))
+else:
+	password = args.password
 
 
 
