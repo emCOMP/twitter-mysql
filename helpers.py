@@ -100,6 +100,45 @@ def insert_tweet(tweet, cursor):
 #
 #
 #
+#
+
+class MySQLBatchInserter(object):
+	"""
+	MySQL batch inserter
+	"""
+
+	def __init__(self,cursor, stmt, batchsize=1000):
+		self.cursor = cursor
+		self.stmt = stmt
+		self.batchsize = batchsize
+		self.items = []
+
+	def insert(self, item):
+		"""
+		prepare an item to be inserted
+		"""
+		self.items.append(item)
+
+		# flushs if necessary
+		count = len(self.items)
+		if count >= self.batchsize:
+			self.flush()
+			return count
+
+		return 0
+
+	def flush(self):
+		"""
+		flushes items to the database
+		"""
+		self.cursor.executemany(self.stmt, self.items)
+		self.items = []
+
+#
+#
+#
+#
+#
 class UserManager(object):
 	"""
 

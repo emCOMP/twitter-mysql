@@ -14,7 +14,7 @@ import getpass
 from mysql_insert_queries import *
 
 
-from helpers import UserManager, HashtagManager, UrlManager, MediaManager, convertRFC822ToDateTime
+from helpers import UserManager, HashtagManager, UrlManager, MediaManager, convertRFC822ToDateTime, MySQLBatchInserter
 
 
 
@@ -38,37 +38,7 @@ class StatusUpdater(object):
 			print "parsed %d tweets (%2.2f%% finished). %d added."%(self.count, progress, self.total_added)
 
 
-class MySQLBatchInserter(object):
-	"""
-	MySQL batch inserter
-	"""
 
-	def __init__(self,cursor, stmt, batchsize=1000):
-		self.cursor = cursor
-		self.stmt = stmt
-		self.batchsize = batchsize
-		self.items = []
-
-	def insert(self, item):
-		"""
-		prepare an item to be inserted
-		"""
-		self.items.append(item)
-
-		# flushs if necessary
-		count = len(self.items)
-		if count >= self.batchsize:
-			self.flush()
-			return count
-
-		return 0
-
-	def flush(self):
-		"""
-		flushes items to the database
-		"""
-		self.cursor.executemany(self.stmt, self.items)
-		self.items = []
 
 
 class MySQLInserter(object):
@@ -94,7 +64,10 @@ class MySQLInserter(object):
 		self.tweet_snapshot_batch_inserter = MySQLBatchInserter(self.cursor, INSERT_TWEET_SNAPSHOT_STMT)
 		self.tweet_retweet_snapshot_batch_inserter = MySQLBatchInserter(self.cursor, INSERT_TWEET_SNAPSHOT_WITH_RETWEET_STMT)
 
-		
+		# entities
+		self.mention_batch_inserter = MySQLBatchInserter(self.cursor, INSERT_MENTION_STMT)
+
+
 
 	def __del__(self):
 		""" """
