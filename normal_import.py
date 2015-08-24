@@ -595,13 +595,15 @@ db=MySQLdb.connect(args.host, args.username, password, args.database, charset='u
 
 c=db.cursor()
 
-
+c.execute("SET FOREIGN_KEY_CHECKS=0;")
 
 inserter = MySQLInserter(c)
 
 inserter.processFile(args.filename, encoding=args.encoding)
 
 print "Finished and committing..."
+
+c.execute("SET FOREIGN_KEY_CHECKS=1;")
 
 c.close()
 
