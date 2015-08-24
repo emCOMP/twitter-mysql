@@ -138,11 +138,11 @@ CREATE TABLE `tweet_snapshots` (
   PRIMARY KEY (`id`),
   KEY `idx_tweets_tweet_id` (`tweet_id`),
   KEY `idx_tweets_retweeted_status_id` (`retweeted_status_id`),
-  KEY `idx_tweets_retweeted_status_user_id` (`retweeted_status_user_id`),
-  KEY `idx_tweets_in_reply_to_user_id` (`in_reply_to_user_id`),
+  FOREIGN KEY (`retweeted_status_user_id`) REFERENCES users(`id`),
+  FOREIGN KEY (`in_reply_to_user_id`) REFERENCES users(`id`),
   KEY `idx_tweets_in_reply_to_status_id` (`in_reply_to_status_id`),
-  KEY `idx_tweets_user_id` (`user_id`),
-  KEY `idx_tweets_retweet_source_id` (`retweet_source_id`),
+  FOREIGN KEY (`user_id`) REFERENCES users(`id`),
+  KEY `idx_tweets_retweet_source_id` (`retweet_source_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5292305 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `tweets` (
@@ -180,12 +180,12 @@ CREATE TABLE `tweets` (
   `retweet_source_id` bigint DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_tweets_user_screen_name` (`user_screen_name`),
-  KEY `idx_tweets_retweeted_status_id` (`retweeted_status_id`),
-  KEY `idx_tweets_retweeted_status_user_id` (`retweeted_status_user_id`),
-  KEY `idx_tweets_in_reply_to_user_id` (`in_reply_to_user_id`),
-  KEY `idx_tweets_in_reply_to_status_id` (`in_reply_to_status_id`),
-  KEY `idx_tweets_user_id` (`user_id`),
-  KEY `idx_tweets_retweet_source_id` (`retweet_source_id`),
+  FOREIGN KEY (`retweeted_status_id`) REFERENCES tweets(`id`),
+  FOREIGN KEY (`retweeted_status_user_id`) REFERENCES users(`id`),
+  FOREIGN KEY (`in_reply_to_user_id`) REFERENCES users(`id`),
+  FOREIGN KEY (`in_reply_to_status_id`) REFERENCES tweets(`id`),
+  FOREIGN KEY (`user_id`) REFERENCES users(`id`),
+  FOREIGN KEY (`retweet_source_id`) REFERENCES tweets(`id`),
   FULLTEXT KEY `idx_tweets_oso_text` (`text`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5292305 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -195,8 +195,8 @@ CREATE TABLE `tweet_url` (
   `id` int NOT NULL AUTO_INCREMENT,
     `tweet_id` bigint NOT NULL, 
     `url_id` int NOT NULL,
-    KEY (tweet_id),
-    KEY (url_id),
+    FOREIGN KEY (`tweet_id`) REFERENCES tweets(`id`),
+    FOREIGN KEY (`url_id`) REFERENCES urls(`id`),
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;    
 
@@ -205,8 +205,8 @@ CREATE TABLE `tweet_mention` (
     `tweet_id` bigint NOT NULL, 
     `user_id` bigint NOT NULL,
     `tweet_index` int(3) NOT NULL,
-    KEY (tweet_id),
-    KEY (user_id),
+    FOREIGN KEY (`tweet_id`) REFERENCES tweets(`id`),
+    FOREIGN KEY (`user_id`) REFERENCES users(`id`),
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -214,8 +214,8 @@ CREATE TABLE `tweet_media` (
   `id` int NOT NULL AUTO_INCREMENT,
     `tweet_id` bigint NOT NULL, 
     `media_id` int NOT NULL,
-    KEY (tweet_id),
-    KEY (media_id),
+    FOREIGN KEY (`tweet_id`) REFERENCES tweets(`id`),
+    FOREIGN KEY (`media_id`) REFERENCES media(`id`),
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;    
     
@@ -223,8 +223,8 @@ CREATE TABLE `tweet_hashtag` (
   `id` int NOT NULL AUTO_INCREMENT,
     `tweet_id` bigint NOT NULL, 
     `hashtag_id` int NOT NULL,
-    KEY (tweet_id),
-    KEY (hashtag_id),
+    FOREIGN KEY (`tweet_id`) REFERENCES tweets(`id`),
+    FOREIGN KEY (`hashtag_id`) REFERENCES hashtags(`id`),
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;  
 
@@ -233,8 +233,8 @@ CREATE TABLE `tweet_webpage` (
   `id` int NOT NULL AUTO_INCREMENT,
     `tweet_id` bigint NOT NULL, 
     `webpage_id` int NOT NULL,
-    KEY (tweet_id),
-    KEY (webpage_id),
+    FOREIGN KEY (`tweet_id`) REFERENCES tweets(`id`),
+    FOREIGN KEY (`webpage_id`) REFERENCES webpages(`id`),
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;  
 
