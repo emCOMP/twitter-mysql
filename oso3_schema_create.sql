@@ -91,6 +91,7 @@ CREATE TABLE `tweet_snapshots` (
   `id` int NOT NULL AUTO_INCREMENT,
   `snapshot_tweet_id` bigint NOT NULL,
   `snapshot_time` DATETIME NOT NULL,
+  `retweet_source_id` bigint DEFAULT NULL,
 
   `tweet_id` bigint NOT NULL,
   `created_at` varchar(64) DEFAULT NULL,
@@ -140,7 +141,8 @@ CREATE TABLE `tweet_snapshots` (
   KEY `idx_tweets_retweeted_status_user_id` (`retweeted_status_user_id`),
   KEY `idx_tweets_in_reply_to_user_id` (`in_reply_to_user_id`),
   KEY `idx_tweets_in_reply_to_status_id` (`in_reply_to_status_id`),
-  KEY `idx_tweets_user_id` (`user_id`)
+  KEY `idx_tweets_user_id` (`user_id`),
+  KEY `idx_tweets_retweet_source_id` (`retweet_source_id`),
 ) ENGINE=InnoDB AUTO_INCREMENT=5292305 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `tweets` (
@@ -160,7 +162,7 @@ CREATE TABLE `tweets` (
   `user_geo_enabled` int(1) default NULL,
   `user_time_zone` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `retweet_count` int DEFAULT NULL,
-  `favorite_count` int DEFAULT NULL,  
+  `favorite_count` int DEFAULT NULL,
   `retweeted` int(1) DEFAULT 0,
   `retweeted_status_id` bigint DEFAULT NULL,
   `retweeted_status_user_screen_name` varchar(80) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -174,8 +176,8 @@ CREATE TABLE `tweets` (
   `in_reply_to_screen_name` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `in_reply_to_status_id` bigint DEFAULT NULL,
   `in_reply_to_user_id` bigint DEFAULT NULL,
-  `in_set` int DEFAULT NULL,
   `local_time` DATETIME NULL DEFAULT NULL,
+  `retweet_source_id` bigint DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_tweets_user_screen_name` (`user_screen_name`),
   KEY `idx_tweets_retweeted_status_id` (`retweeted_status_id`),
@@ -183,7 +185,8 @@ CREATE TABLE `tweets` (
   KEY `idx_tweets_in_reply_to_user_id` (`in_reply_to_user_id`),
   KEY `idx_tweets_in_reply_to_status_id` (`in_reply_to_status_id`),
   KEY `idx_tweets_user_id` (`user_id`),
-  FULLTEXT KEY `idx_tweets_Oso_text` (`text`)
+  KEY `idx_tweets_retweet_source_id` (`retweet_source_id`),
+  FULLTEXT KEY `idx_tweets_oso_text` (`text`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5292305 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 

@@ -55,7 +55,7 @@ def insert_tweet(tweet, cursor):
 	}
 
 
-	if "geo" in obj and "coordinates" in obj["geo"] and len(obj["geo"]["coordinates"]) > 1:
+	if "geo" in tweet and "coordinates" in tweet["geo"] and len(tweet["geo"]["coordinates"]) > 1:
 		geo = {
 			"geo_coordinates_0": tweet["geo"]["coordinates"][0],
 			"geo_coordinates_1": tweet["geo"]["coordinates"][1],		

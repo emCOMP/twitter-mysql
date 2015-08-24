@@ -19,6 +19,7 @@ TWEET_BASE_STMT = """ INTO `tweets`
 `source`,
 `in_reply_to_screen_name`,
 `in_reply_to_status_id`,
+`retweet_source_id`,
 `in_reply_to_user_id`)
 VALUES
 (%(id)s,
@@ -38,7 +39,8 @@ VALUES
 %(source)s,
 %(in_reply_to_screen_name)s,
 %(in_reply_to_status_id)s,
-%(in_reply_to_user_id)s)
+%(in_reply_to_user_id)s,
+%(retweet_source_id)s)
 """
 
 TWEET_WITH_RETWEET_BASE_STMT = """ INTO `tweets`
@@ -68,7 +70,8 @@ TWEET_WITH_RETWEET_BASE_STMT = """ INTO `tweets`
 `source`,
 `in_reply_to_screen_name`,
 `in_reply_to_status_id`,
-`in_reply_to_user_id`)
+`in_reply_to_user_id`,
+`retweet_source_id`)
 VALUES
 (%(id)s,
 %(created_at)s,
@@ -96,7 +99,8 @@ VALUES
 %(source)s,
 %(in_reply_to_screen_name)s,
 %(in_reply_to_status_id)s,
-%(in_reply_to_user_id)s
+%(in_reply_to_user_id)s,
+%(retweet_source_id)s
 )"""
 
 
@@ -139,7 +143,8 @@ TWEET_SNAPSHOT_BASE_STMT = """ INTO `tweet_snapshots`
 `source`,
 `in_reply_to_screen_name`,
 `in_reply_to_status_id`,
-`in_reply_to_user_id`)
+`in_reply_to_user_id`,
+`retweet_source_id`)
 VALUES
 (
 %(snapshot_tweet_id)s,
@@ -174,7 +179,8 @@ VALUES
 %(source)s,
 %(in_reply_to_screen_name)s,
 %(in_reply_to_status_id)s,
-%(in_reply_to_user_id)s
+%(in_reply_to_user_id)s,
+%(retweet_source_id)s
 )"""
 
 
@@ -220,7 +226,8 @@ TWEET_SNAPSHOT_WITH_RETWEET_BASE_STMT = """ INTO `tweet_snapshots`
 `source`,
 `in_reply_to_screen_name`,
 `in_reply_to_status_id`,
-`in_reply_to_user_id`)
+`in_reply_to_user_id`,
+`retweet_source_id`)
 VALUES
 (
 %(snapshot_tweet_id)s,
@@ -263,7 +270,8 @@ VALUES
 %(source)s,
 %(in_reply_to_screen_name)s,
 %(in_reply_to_status_id)s,
-%(in_reply_to_user_id)s
+%(in_reply_to_user_id)s,
+%(retweet_source_id)s
 )"""
 
 INSERT_TWEET_SNAPSHOT_STMT = "INSERT" + TWEET_SNAPSHOT_BASE_STMT

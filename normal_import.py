@@ -181,7 +181,7 @@ class MySQLInserter(object):
 		self.insert_users_from_snapshots()
 
 
-	def processTweetSnapshot(self, tweet, snapshot_id = None, snapshot_time = None):
+	def processTweetSnapshot(self, tweet, snapshot_id = None, snapshot_time = None, retweet_source_id = None):
 		"""
 
 		"""
@@ -194,6 +194,7 @@ class MySQLInserter(object):
 
 		tweet['snapshot_tweet_id'] = snapshot_id if snapshot_id is not None else tweet_id
 		tweet['snapshot_time'] = snapshot_time if snapshot_time is not None else created_ts
+		tweet['retweet_source_id'] = retweet_source_id
 
 		# add user
 		#self.user_mgr.add(tweet)
@@ -203,12 +204,12 @@ class MySQLInserter(object):
 			retweet = tweet['retweeted_status']
 			retweet['created_ts'] = convertRFC822ToDateTime(retweet['created_at'])
 			retweet['user']['created_ts'] = convertRFC822ToDateTime(retweet['user']['created_at'])
-			self.processTweetSnapshot(retweet, tweet_id, created_ts)
+			self.processTweetSnapshot(retweet, tweet_id, created_ts, tweet_id)
 
 
 		# add tweet
 		#cnt = 0
-		cnt = self.insert_snapshot(tweet)
+		cnt = self.insert_snapshot(tweet, retweet_source_id)
 
 
 		if tweet_id  not in self.processed_tweets:
@@ -381,7 +382,7 @@ class MySQLInserter(object):
 		}
 
 
-		if "geo" in obj and "coordinates" in obj["geo"] and len(obj["geo"]["coordinates"]) > 1:
+		if "geo" in tweet and "coordinates" in tweet["geo"] and len(tweet["geo"]["coordinates"]) > 1:
 			geo = {
 				"geo_coordinates_0": tweet["geo"]["coordinates"][0],
 				"geo_coordinates_1": tweet["geo"]["coordinates"][1],		
@@ -426,7 +427,7 @@ class MySQLInserter(object):
 			raise e
 
 
-	def insert_snapshot(self, tweet):
+	def insert_snapshot(self, tweet, retweet_source_id):
 		""" 
 
 		"""
@@ -435,6 +436,7 @@ class MySQLInserter(object):
 		obj = {
 			"snapshot_tweet_id": tweet["snapshot_tweet_id"],
 			"snapshot_time": tweet["snapshot_time"],
+			"retweet_source_id": tweet["retweet_source_id"],
 			"tweet_id": tweet["id"],
 			"created_at": tweet["created_at"],
 			"created_ts": tweet["created_ts"],
@@ -463,14 +465,17 @@ class MySQLInserter(object):
 			"in_reply_to_status_id": tweet["in_reply_to_status_id"],
 			"in_reply_to_user_id": tweet["in_reply_to_user_id"],
 			"retweet_count": tweet["retweet_count"],
-			"favorite_count": tweet["favorite_count"]
+			"favorite_count": tweet["favorite_count"],
+			"from_retweet": retweet_source_id
 		}
 
 
-		if "geo" in obj and "coordinates" in obj["geo"] and len(obj["geo"]["coordinates"]) > 1:
+		geo = tweet.get("geo", None)
+		coordinates = None if geo is None else geo.get("coordinates", None)
+		if coordinates is not None and len(coordinates) > 1:
 			geo = {
 				"geo_coordinates_0": tweet["geo"]["coordinates"][0],
-				"geo_coordinates_1": tweet["geo"]["coordinates"][1],		
+				"geo_coordinates_1": tweet["geo"]["coordinates"][1],
 			}
 		else:
 			geo = {
