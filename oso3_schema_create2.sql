@@ -1,8 +1,17 @@
-#
+
+USE `oso3`;
+
+# update to local time
 update tweets set local_time = DATE_SUB(created_ts, interval 7 hour) where id > 0;
+update tweet_snapshots set local_time = DATE_SUB(created_ts, interval 7 hour) where id > 0;
 
-
+DROP TABLE IF EXISTS `user_account_types`;
 DROP TABLE IF EXISTS `account_types`;
+DROP TABLE IF EXISTS `tweet_subset_tags`;
+DROP TABLE IF EXISTS `user_subset_tags`;
+DROP TABLE IF EXISTS `subset_tags`;
+
+
 CREATE TABLE `account_types` (
     `id` int NOT NULL AUTO_INCREMENT,
     `name` varchar(128) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -14,18 +23,18 @@ CREATE TABLE `account_types` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
-DROP TABLE IF EXISTS `user_account_types`;
+
 CREATE TABLE `user_account_types` (
 	`id` int NOT NULL AUTO_INCREMENT,
     `account_type_id` int NOT NULL,
     `user_id` bigint NOT NULL,
     PRIMARY KEY (`id`),
     KEY `idx_user_account_type_account_type_id` (`account_type_id`),
-    KEY `idx_user_account_type_user_id` (`user_id`)
+    FOREIGN KEY (`user_id`) REFERENCES users(`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
-DROP TABLE IF EXISTS `subset_tags`;
+
 CREATE TABLE `subset_tags` (
 	`id` int NOT NULL AUTO_INCREMENT,
 	`name` varchar(128) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -35,24 +44,24 @@ CREATE TABLE `subset_tags` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
-DROP TABLE IF EXISTS `tweet_subset_tags`;
+
 CREATE TABLE `tweet_subset_tags` (
 	`id` int NOT NULL AUTO_INCREMENT,
     `subset_tag_id` int NOT NULL,
     `tweet_id` bigint NOT NULL,
     PRIMARY KEY (`id`),
     KEY `idx_tweet_subset_tags_subset_tag_id` (`subset_tag_id`),
-    KEY `idx_tweet_subset_tags_tweet_id` (`tweet_id`)
+    FOREIGN KEY (`tweet_id`) REFERENCES tweets(`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `user_subset_tags`;
+
 CREATE TABLE `user_subset_tags` (
 	`id` int NOT NULL AUTO_INCREMENT,
     `subset_tag_id` int NOT NULL,
     `user_id` bigint NOT NULL,
     PRIMARY KEY (`id`),
     KEY `idx_user_subset_tag_subset_tag_id` (`subset_tag_id`),
-    KEY `idx_user_subset_tag_user_id` (`user_id`)
+    FOREIGN KEY (`user_id`) REFERENCES users(`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 #
