@@ -58,3 +58,8 @@ target/
 
 # Vagrant
 .vagrant/
+Vagrantfile
+
+# misc files
+*.json
+
