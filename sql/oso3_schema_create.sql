@@ -7,6 +7,7 @@ SET SQL_MODE='ALLOW_INVALID_DATES';
 #=====================================
 # drop instance tables
 #=====================================
+
 DROP TABLE IF EXISTS `tweet_url`;
 DROP TABLE IF EXISTS `tweet_mention`;
 DROP TABLE IF EXISTS `tweet_media`;

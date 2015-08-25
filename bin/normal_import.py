@@ -9,7 +9,7 @@ from pprint import pprint
 import os
 import sys
 import argparse
-import getpass
+from utils.db import add_db_args, get_db_mysql_connection
 
 from mysql_insert_queries import *
 
@@ -567,31 +567,19 @@ class MySQLInserter(object):
 #
 #
 parser = argparse.ArgumentParser(description='whatevs')
-parser.add_argument('host', help='host')
-parser.add_argument('database', help='database name')
-parser.add_argument('username', help="username")
 parser.add_argument('-l', '--limit', help="limit", type=int, default=0)
 #parser.add_argument('-o', '--output', help="outfile")
 parser.add_argument('-f', '--filename', help="input file")
 parser.add_argument('-e', '--encoding', default="utf-8", help="json file encoding (default is utf-8)")
-parser.add_argument('--db-encoding', default="utf8mb4", help="database encoding")
 #parser.add_argument('-b', '--batchsize', default=1000, type=int, help="batch insert size")
 parser.add_argument('-c', '--check', dest="check", action="store_true", help="check if tweet exists before inserting")
 parser.add_argument('-r', '--no_retweets', dest="no_retweets", action="store_true", help="do not add embedded retweets")
-parser.add_argument('-p', '--password', help="password for database. if not specified, will prompt.")
+parser.add_db_args(parser)
 args = parser.parse_args()
 
 
-if args.password is None:
-	password = getpass.getpass("Enter password for %s@%s (%s) : "%(args.username, args.host, args.database))
-else:
-	password = args.password
 
-
-
-db=MySQLdb.connect(args.host, args.username, password, args.database, charset='utf8mb4', use_unicode=True)
-
-
+db = get_db_mysql_connection(args)
 
 c=db.cursor()
 
