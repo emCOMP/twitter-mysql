@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import argparse
 import io
-from ..utils.db import add_db_args, get_db_mysql_connection
+from twitter_mysql.utils.db import add_db_args, get_db_mysql_connection
 
 #
 #
@@ -11,7 +11,7 @@ from ..utils.db import add_db_args, get_db_mysql_connection
 #
 parser = argparse.ArgumentParser(description='user id dumper')
 parser.add_argument('filename', help="output file")
-parser.add_db_args(parser)
+add_db_args(parser)
 args = parser.parse_args()
 
 # open db connection
@@ -22,6 +22,9 @@ c=db.cursor()
 results = c.execute("""select id from users""")
 
 with io.open(args.filename, "w") as f:
-	for row in results:
-		f.write(row[0] + "\n")
+	for row in c:
+		f.write(unicode(row[0]) + "\n")
+
+c.close()
+db.close()
 

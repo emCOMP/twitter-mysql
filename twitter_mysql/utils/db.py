@@ -22,10 +22,13 @@ def get_db_password(args):
 	else:
 		password = args.password
 
+	return password
+
 def get_db_mysql_connection(args, password=None):
 	"""creates database connection from argparser args object. 
 	will call get_db_password if not specified."""
 	if password is None:
 		password = get_db_password(args)
+
 	db=MySQLdb.connect(args.host, args.username, password, args.database, charset='utf8mb4', use_unicode=True)
 	return db
