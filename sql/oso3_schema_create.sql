@@ -63,8 +63,25 @@ CREATE TABLE `users` (
   `utc_offset` int DEFAULT NULL,
   `verified` int(1) DEFAULT NULL,
 
+  `profile_use_background_image` int(1) DEFAULT NULL,
+  `default_profile_image` int(1) DEFAULT NULL,
+  `profile_sidebar_fill_color` varchar(16) DEFAULT NULL,
+  `profile_text_color` varchar(16) DEFAULT NULL,
+  `profile_sidebar_border_color` varchar(16) DEFAULT NULL,
+  `profile_background_color` varchar(16) DEFAULT NULL,
+  `profile_link_color` varchar(16) DEFAULT NULL,
+  `profile_image_url` varchar(256) DEFAULT NULL,
+  `profile_banner_url` varchar(256) DEFAULT NULL,
+  `profile_background_image_url` varchar(256) DEFAULT NULL,
+  `profile_background_tile` int(1) DEFAULT NULL,
+  `contributors_enabled` int(1) DEFAULT NULL,
+  `default_profile` int(1) DEFAULT NULL,
+  `is_translator` int(1) DEFAULT NULL,
+
+  `source_snapshot_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `idx_user_screen_name` (`screen_name`)
+  KEY `idx_user_screen_name` (`screen_name`),
+  KEY `idx_source_snapshot_id` (`source_snapshot_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
@@ -119,6 +136,22 @@ CREATE TABLE `tweet_snapshots` (
   `user_url` varchar(512) DEFAULT NULL,
   `user_utc_offset` int DEFAULT NULL,
   `user_verified` int(1) DEFAULT NULL,
+
+  `user_profile_use_background_image` int(1) DEFAULT NULL,
+  `user_default_profile_image` int(1) DEFAULT NULL,
+  `user_profile_sidebar_fill_color` varchar(16) DEFAULT NULL,
+  `user_profile_text_color` varchar(16) DEFAULT NULL,
+  `user_profile_sidebar_border_color` varchar(16) DEFAULT NULL,
+  `user_profile_background_color` varchar(16) DEFAULT NULL,
+  `user_profile_link_color` varchar(16) DEFAULT NULL,
+  `user_profile_image_url` varchar(256) DEFAULT NULL,
+  `user_profile_banner_url` varchar(256) DEFAULT NULL,
+  `user_profile_background_image_url` varchar(256) DEFAULT NULL,
+  `user_profile_background_tile` int(1) DEFAULT NULL,
+  `user_contributors_enabled` int(1) DEFAULT NULL,
+  `user_default_profile` int(1) DEFAULT NULL,
+  `user_is_translator` int(1) DEFAULT NULL,
+
   `retweet_count` int DEFAULT NULL,
   `favorite_count` int DEFAULT NULL,
   `retweeted_status_id` bigint DEFAULT NULL,
@@ -179,6 +212,7 @@ CREATE TABLE `tweets` (
   `in_reply_to_user_id` bigint DEFAULT NULL,
   `local_time` DATETIME NULL DEFAULT NULL,
   `retweet_source_id` bigint DEFAULT NULL,
+  `source_snapshot_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_tweets_user_screen_name` (`user_screen_name`),
   FOREIGN KEY (`retweeted_status_id`) REFERENCES tweets(`id`),
@@ -187,6 +221,7 @@ CREATE TABLE `tweets` (
   FOREIGN KEY (`in_reply_to_status_id`) REFERENCES tweets(`id`),
   FOREIGN KEY (`user_id`) REFERENCES users(`id`),
   FOREIGN KEY (`retweet_source_id`) REFERENCES tweets(`id`),
+  FOREIGN KEY (`source_snapshot_id`) REFERENCES tweet_snapshots(`id`),
   FULLTEXT KEY `idx_tweets_oso_text` (`text`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5292305 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

@@ -1,6 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""
+Regex for converting SQL Table lines to insert lines:
+	Find: (`[\w_]*`)[^,]*,
+	Replace: \1,
+
+Regex for setting statements:
+	Find: `([\w_]*)`,
+	Replace: %(\1)s,
+
+Regex for insert from snapshots:
+	Find: `([\w_]*)`(,?)
+	Replace: ts.`\1` as \1\2
+
+"""
+
+
 TWEET_BASE_STMT = """ INTO `tweets`
 (`id`,
 `created_at`,
@@ -138,6 +154,22 @@ TWEET_SNAPSHOT_BASE_STMT = """ INTO `tweet_snapshots`
 `user_url`,
 `user_utc_offset`,
 `user_verified`,
+
+`user_profile_use_background_image`,
+`user_default_profile_image`,
+`user_profile_sidebar_fill_color`,
+`user_profile_text_color`,
+`user_profile_sidebar_border_color`,
+`user_profile_background_color`,
+`user_profile_link_color`,
+`user_profile_image_url`,
+`user_profile_banner_url`,
+`user_profile_background_image_url`,
+`user_profile_background_tile`,
+`user_contributors_enabled`,
+`user_default_profile`,
+`user_is_translator`,
+
 `retweet_count`,
 `favorite_count`,
 `source`,
@@ -174,6 +206,22 @@ VALUES
 %(user_url)s,
 %(user_utc_offset)s,
 %(user_verified)s,
+
+%(user_profile_use_background_image)s,
+%(user_default_profile_image)s,
+%(user_profile_sidebar_fill_color)s,
+%(user_profile_text_color)s,
+%(user_profile_sidebar_border_color)s,
+%(user_profile_background_color)s,
+%(user_profile_link_color)s,
+%(user_profile_image_url)s,
+%(user_profile_banner_url)s,
+%(user_profile_background_image_url)s,
+%(user_profile_background_tile)s,
+%(user_contributors_enabled)s,
+%(user_default_profile)s,
+%(user_is_translator)s,
+
 %(retweet_count)s,
 %(favorite_count)s,
 %(source)s,
@@ -213,6 +261,22 @@ TWEET_SNAPSHOT_WITH_RETWEET_BASE_STMT = """ INTO `tweet_snapshots`
 `user_url`,
 `user_utc_offset`,
 `user_verified`,
+
+`user_profile_use_background_image`,
+`user_default_profile_image`,
+`user_profile_sidebar_fill_color`,
+`user_profile_text_color`,
+`user_profile_sidebar_border_color`,
+`user_profile_background_color`,
+`user_profile_link_color`,
+`user_profile_image_url`,
+`user_profile_banner_url`,
+`user_profile_background_image_url`,
+`user_profile_background_tile`,
+`user_contributors_enabled`,
+`user_default_profile`,
+`user_is_translator`,
+
 `retweet_count`,
 `favorite_count`,
 `retweeted_status_id`,
@@ -257,6 +321,23 @@ VALUES
 %(user_url)s,
 %(user_utc_offset)s,
 %(user_verified)s,
+
+%(user_profile_use_background_image)s,
+%(user_default_profile_image)s,
+%(user_profile_sidebar_fill_color)s,
+%(user_profile_text_color)s,
+%(user_profile_sidebar_border_color)s,
+%(user_profile_background_color)s,
+%(user_profile_link_color)s,
+%(user_profile_image_url)s,
+%(user_profile_banner_url)s,
+%(user_profile_background_image_url)s,
+%(user_profile_background_tile)s,
+%(user_contributors_enabled)s,
+%(user_default_profile)s,
+%(user_is_translator)s,
+
+
 %(retweet_count)s,
 %(favorite_count)s,
 %(retweeted_status_id)s,
@@ -298,7 +379,21 @@ USER_BASE_STMT = """ INTO `users` (
 `time_zone`,
 `url`,
 `utc_offset`,
-`verified`)
+`verified`,
+`profile_use_background_image`,
+`default_profile_image`,
+`profile_sidebar_fill_color`,
+`profile_text_color`,
+`profile_sidebar_border_color`,
+`profile_background_color`,
+`profile_link_color`,
+`profile_image_url`,
+`profile_banner_url`,
+`profile_background_image_url`,
+`profile_background_tile`,
+`contributors_enabled`,
+`default_profile`,
+`is_translator`)
 VALUES (
 %(id)s, 
 %(screen_name)s,
@@ -317,7 +412,21 @@ VALUES (
 %(time_zone)s,
 %(url)s,
 %(utc_offset)s,
-%(verified)s
+%(verified)s,
+%(profile_use_background_image)s,
+%(default_profile_image)s,
+%(profile_sidebar_fill_color)s,
+%(profile_text_color)s,
+%(profile_sidebar_border_color)s,
+%(profile_background_color)s,
+%(profile_link_color)s,
+%(profile_image_url)s,
+%(profile_banner_url)s,
+%(profile_background_image_url)s,
+%(profile_background_tile)s,
+%(contributors_enabled)s,
+%(default_profile)s,
+%(is_translator)s
 )"""
 
 INSERT_USER_STMT = "INSERT " + USER_BASE_STMT
@@ -342,7 +451,22 @@ REPLACE_USER_STMT = """REPLACE INTO `users` (
 `time_zone`,
 `url`,
 `utc_offset`,
-`verified`)
+`verified`,
+`profile_use_background_image`,
+`default_profile_image`,
+`profile_sidebar_fill_color`,
+`profile_text_color`,
+`profile_sidebar_border_color`,
+`profile_background_color`,
+`profile_link_color`,
+`profile_image_url`,
+`profile_banner_url`,
+`profile_background_image_url`,
+`profile_background_tile`,
+`contributors_enabled`,
+`default_profile`,
+`is_translator`
+)
 VALUES (
 %(id)s, 
 %(screen_name)s,
@@ -361,7 +485,21 @@ VALUES (
 %(time_zone)s,
 %(url)s,
 %(utc_offset)s,
-%(verified)s
+%(verified)s,
+%(profile_use_background_image)s,
+%(default_profile_image)s,
+%(profile_sidebar_fill_color)s,
+%(profile_text_color)s,
+%(profile_sidebar_border_color)s,
+%(profile_background_color)s,
+%(profile_link_color)s,
+%(profile_image_url)s,
+%(profile_banner_url)s,
+%(profile_background_image_url)s,
+%(profile_background_tile)s,
+%(contributors_enabled)s,
+%(default_profile)s,
+%(is_translator)s
 )"""
 
 
@@ -457,7 +595,8 @@ INSERT INTO tweets (
 `source`,
 `in_reply_to_screen_name`,
 `in_reply_to_status_id`,
-`in_reply_to_user_id`)
+`in_reply_to_user_id`,
+`source_snapshot_id`)
 select 
 ts.tweet_id as id, 
 ts.`created_at`,
@@ -487,7 +626,8 @@ ts.`retweeted_status_user_followers_count`,
 ts.`source`,
 ts.`in_reply_to_screen_name`,
 ts.`in_reply_to_status_id`,
-ts.`in_reply_to_user_id`
+ts.`in_reply_to_user_id`,
+ts.`id`
 
 from oso3.tweet_snapshots ts
 inner join (select ts1.tweet_id, max(ts1.snapshot_tweet_id) as max_snapshot_tweet_id
@@ -516,7 +656,22 @@ INSERT INTO users (
 `time_zone`,
 `url`,
 `utc_offset`,
-`verified`)
+`verified`,
+`profile_use_background_image`,
+`default_profile_image`,
+`profile_sidebar_fill_color`,
+`profile_text_color`,
+`profile_sidebar_border_color`,
+`profile_background_color`,
+`profile_link_color`,
+`profile_image_url`,
+`profile_banner_url`,
+`profile_background_image_url`,
+`profile_background_tile`,
+`contributors_enabled`,
+`default_profile`,
+`is_translator`,
+`source_snapshot_id`)
 select 
 ts.`user_id` as id, 
 ts.`user_screen_name` as screen_name,
@@ -535,7 +690,22 @@ ts.`user_name` as name,
 ts.`user_time_zone` as time_zone,
 ts.`user_url` as url,
 ts.`user_utc_offset` as utc_offset,
-ts.`user_verified` as verified
+ts.`user_verified` as verified,
+ts.`user_profile_use_background_image` as profile_use_background_image,
+ts.`user_default_profile_image` as default_profile_image,
+ts.`user_profile_sidebar_fill_color` as profile_sidebar_fill_color,
+ts.`user_profile_text_color` as profile_text_color,
+ts.`user_profile_sidebar_border_color` as profile_sidebar_border_color,
+ts.`user_profile_background_color` as profile_background_color,
+ts.`user_profile_link_color` as profile_link_color,
+ts.`user_profile_image_url` as profile_image_url,
+ts.`user_profile_banner_url` as profile_banner_url,
+ts.`user_profile_background_image_url` as profile_background_image_url,
+ts.`user_profile_background_tile` as profile_background_tile,
+ts.`user_contributors_enabled` as contributors_enabled,
+ts.`user_default_profile` as default_profile,
+ts.`user_is_translator` as is_translator,
+ts.`id`
 
 from oso3.tweet_snapshots ts
 inner join (select ts1.user_id, max(ts1.snapshot_tweet_id) as max_snapshot_tweet_id

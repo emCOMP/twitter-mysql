@@ -1,21 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import argparse
 import io
-from twitter_mysql.utils.db import add_db_args, get_db_mysql_connection
+from twitter_mysql.utils.db import build_connection_from_configfile
+from twitter_mysql.utils.configfile import ConfigArgumentParser, get_configfile_from_args
 
 #
 #
 # program arguments
 #
 #
-parser = argparse.ArgumentParser(description='user id dumper')
-parser.add_argument('filename', help="output file")
-add_db_args(parser)
-args = parser.parse_args()
+argparser = ConfigArgumentParser(description="dump user ids in database")
+argparser.add_argument("filename", help="output filename")
+args = argparser.parse_args()
+configfile = get_configfile_from_args(args)
 
 # open db connection
-db = get_db_mysql_connection(args)
+db = build_connection_from_configfile(configfile)
 c=db.cursor()
 
 # run query

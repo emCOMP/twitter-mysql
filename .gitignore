@@ -63,3 +63,5 @@ Vagrantfile
 # misc files
 *.json
 
+# data files
+data/

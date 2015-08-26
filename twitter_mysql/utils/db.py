@@ -32,3 +32,25 @@ def get_db_mysql_connection(args, password=None):
 
 	db=MySQLdb.connect(args.host, args.username, password, args.database, charset='utf8mb4', use_unicode=True)
 	return db
+
+def build_connection_from_configfile(configfile):
+	"""builds database connection from configfile."""
+
+	# throw exception if configfile is invalid
+	if configfile is None:
+		raise Exception("configfile is None.")
+
+	# parse args
+	host = configfile.getValue("database.host", default="localhost")
+	database = configfile.getValueOrRaise(
+		"database.database",
+		error_message="A database name must be specified in the config file.")
+	user = configfile.getValue("database.user", default="root")
+	password = configfile.getValue("database.password", default="")
+	charset = configfile.getValue("database.charset", default="utf8mb4")
+
+	# create connection
+	db = MySQLdb.connect(host, user, password, 
+			database, charset=charset, use_unicode=True)
+
+	return db

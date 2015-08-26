@@ -9,12 +9,11 @@ from pprint import pprint
 import os
 import sys
 import argparse
-from utils.db import add_db_args, get_db_mysql_connection
-
 from mysql_insert_queries import *
 
-
-from helpers import UserManager, HashtagManager, UrlManager, MediaManager, convertRFC822ToDateTime, MySQLBatchInserter
+from twitter_mysql.utils.db import build_connection_from_configfile
+from twitter_mysql.utils.configfile import ConfigArgumentParser, get_configfile_from_args
+from twitter_mysql.utils.db_helpers import UserManager, HashtagManager, UrlManager, MediaManager, convertRFC822ToDateTime, MySQLBatchInserter
 
 
 
@@ -460,6 +459,23 @@ class MySQLInserter(object):
 			"user_url": user["url"],
 			"user_utc_offset": user["utc_offset"],
 			"user_verified": user["verified"],
+			"user_profile_use_background_image": user.get("profile_use_background_image"),
+			"user_default_profile_image": user.get("default_profile_image"),
+			"user_profile_sidebar_fill_color": user.get("profile_sidebar_fill_color"),
+			"user_profile_text_color": user.get("profile_text_color"),
+			"user_profile_sidebar_border_color": user.get("profile_sidebar_border_color"),
+			"user_profile_background_color": user.get("profile_background_color"),
+			"user_profile_background_image_url_https": user.get("profile_background_image_url_https"),
+			"user_profile_link_color": user.get("profile_link_color"),
+			"user_profile_image_url": user.get("profile_image_url"),
+			"user_profile_banner_url": user.get("profile_banner_url"),
+			"user_profile_background_image_url": user.get("profile_background_image_url"),
+			"user_profile_background_tile": user.get("profile_background_tile"),
+			"user_contributors_enabled": user.get("contributors_enabled"),
+			"user_default_profile": user.get("default_profile"),
+			"user_is_translator": user.get("is_translator"),
+
+
 			"source": tweet["source"],
 			"in_reply_to_screen_name": tweet["in_reply_to_screen_name"],
 			"in_reply_to_status_id": tweet["in_reply_to_status_id"],
@@ -566,22 +582,20 @@ class MySQLInserter(object):
 # program arguments
 #
 #
-parser = argparse.ArgumentParser(description='whatevs')
+parser = ConfigArgumentParser(description='whatevs')
+parser.add_argument('filename', help="input file")
 parser.add_argument('-l', '--limit', help="limit", type=int, default=0)
-#parser.add_argument('-o', '--output', help="outfile")
-parser.add_argument('-f', '--filename', help="input file")
 parser.add_argument('-e', '--encoding', default="utf-8", help="json file encoding (default is utf-8)")
-#parser.add_argument('-b', '--batchsize', default=1000, type=int, help="batch insert size")
-parser.add_argument('-c', '--check', dest="check", action="store_true", help="check if tweet exists before inserting")
+parser.add_argument('--check', dest="check", action="store_true", help="check if tweet exists before inserting")
 parser.add_argument('-r', '--no_retweets', dest="no_retweets", action="store_true", help="do not add embedded retweets")
-parser.add_db_args(parser)
 args = parser.parse_args()
+configfile = get_configfile_from_args(args)
 
 
-
-db = get_db_mysql_connection(args)
-
+# open db connection
+db = build_connection_from_configfile(configfile)
 c=db.cursor()
+
 
 c.execute("SET FOREIGN_KEY_CHECKS=0;")
 
