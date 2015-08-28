@@ -1,5 +1,9 @@
 use `oso3`;
 
+DROP TABLE IF EXISTS `users_current`;
+DROP TABLE IF EXISTS `users_stats`;
+DROP TABLE IF EXISTS `tweets_stats`;
+
 CREATE TABLE `users_current` (
   `id` bigint NOT NULL, 
   `screen_name` varchar(140) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -41,11 +45,11 @@ CREATE TABLE `users_current` (
 
   PRIMARY KEY (`id`),
   FOREIGN KEY (`id`) REFERENCES users(`id`),
-  KEY `idx_user_screen_name` (`screen_name`),
+  KEY `idx_user_screen_name` (`screen_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
-CREATE TABLE `user_stats` (
+CREATE TABLE `users_stats` (
   `id` bigint NOT NULL,
 
   /* in set values */
@@ -91,20 +95,20 @@ CREATE TABLE `user_stats` (
   `tweet_with_urls_count` int DEFAULT NULL,
   `tweet_with_media_count` int DEFAULT NULL,
 
-  `percent_tweets_retweets` int DEFAULT NULL, /* % of users's tweets that are retweets */
-  `percent_tweets_replies` int DEFAULT NULL, /* % of user's tweets that are replies */
-  `percent_tweets_copies` int DEFAULT NULL, /* % of user's tweets that are later copies of another tweet */
-  `percent_tweets_originals` int DEFAULT NULL, /* number of tweets that are deemed to be original */
+  `percent_tweets_retweets` decimal(16,4) DEFAULT NULL, /* % of users's tweets that are retweets */
+  `percent_tweets_replies` decimal(16,4) DEFAULT NULL, /* % of user's tweets that are replies */
+  `percent_tweets_copies` decimal(16,4) DEFAULT NULL, /* % of user's tweets that are later copies of another tweet */
+  `percent_tweets_originals` decimal(16,4) DEFAULT NULL, /* number of tweets that are deemed to be original */
 
 
 
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`id`) REFERENCES users(`id`),
+  FOREIGN KEY (`id`) REFERENCES users(`id`)
 
-)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
-CREATE TABLE `tweet_stats` (
+CREATE TABLE `tweets_stats` (
   `id` bigint NOT NULL,
 
   `replies_count` int DEFAULT NULL,
@@ -114,8 +118,9 @@ CREATE TABLE `tweet_stats` (
   `duplicate_count` int DEFAULT NULL,
 
   `duplicate_of_tweet` bigint DEFAULT NULL,
+  `snapshot_count` int DEFAULT NULL,
 
   PRIMARY KEY (`id`),
   FOREIGN KEY (`id`) REFERENCES tweets(`id`),
-  FOREIGN KEY (`copy_of_tweet`) REFERENCES tweets(`id`),
-)
+  FOREIGN KEY (`duplicate_of_tweet`) REFERENCES tweets(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
