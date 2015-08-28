@@ -48,7 +48,13 @@ CREATE TABLE `users_current` (
 CREATE TABLE `user_stats` (
   `id` bigint NOT NULL,
 
-  `statuses_count_in_set` int DEFAULT NULL, 
+  /* in set values */
+  `statuses_count_in_set` int DEFAULT NULL, /* total number of tweets in the set */
+  `snapshot_count_in_set` int DEFAULT NULL, /* total number of users snapshots in set */
+  `first_tweet_date` DATETIME DEFAULT NULL, /* first datetime in set */
+  `last_tweet_date` DATETIME DEFAULT NULL, /* last datetime in set */
+  `first_snapshot_date` DATETIME DEFAULT NULL, /* first datetime of snapshot in set */
+  `last_snapshot_date` DATETIME DEFAULT NULL, /* first datetime of snapshot in set */
 
   `followers_count_min` int DEFAULT NULL,
   `followers_count_max` int DEFAULT NULL,
@@ -74,16 +80,20 @@ CREATE TABLE `user_stats` (
   `profile_change_count` int DEFAULT NULL,
   `url_change_count` int DEFAULT NULL,
 
-  /* in set values */
   `timeline_total_retweets` int DEFAULT NULL, /* number of user's tweets in set that have been retweeted */
   `timeline_total_replied` int DEFAULT NULL, /* number of tweets that have replies from other people */
   `timeline_total_favorited` int DEFAULT NULL, /* number of tweets that have been favorited */
+  
 
-  `users_retweet_count` int DEFAULT NULL, /* number of users tweets in collection that are retweets */
-  `users_replies_count` int DEFAULT NULL, /* number of uers tweets in collection that are replies */
+  `tweet_retweet_count` int DEFAULT NULL, /* number of users tweets in collection that are retweets */
+  `tweet_replies_count` int DEFAULT NULL, /* number of uers tweets in collection that are replies */
+  `tweet_with_mentions_count` int DEFAULT NULL, /* number of tweets containing mentions */
+  `tweet_with_urls_count` int DEFAULT NULL,
+  `tweet_with_media_count` int DEFAULT NULL,
 
   `percent_tweets_retweets` int DEFAULT NULL, /* % of users's tweets that are retweets */
   `percent_tweets_replies` int DEFAULT NULL, /* % of user's tweets that are replies */
+  `percent_tweets_copies` int DEFAULT NULL, /* % of user's tweets that are later copies of another tweet */
   `percent_tweets_originals` int DEFAULT NULL, /* number of tweets that are deemed to be original */
 
 
@@ -98,9 +108,14 @@ CREATE TABLE `tweet_stats` (
   `id` bigint NOT NULL,
 
   `replies_count` int DEFAULT NULL,
-  `replies_in_set` int DEFAULT NULL
+  `retweet_count` int DEFAULT NULL,
+  `retweets_in_set` int DEFAULT NULL,
+  `favorites_count` int DEFAULT NULL,
+  `duplicate_count` int DEFAULT NULL,
+
+  `duplicate_of_tweet` bigint DEFAULT NULL,
 
   PRIMARY KEY (`id`),
   FOREIGN KEY (`id`) REFERENCES tweets(`id`),
-
+  FOREIGN KEY (`copy_of_tweet`) REFERENCES tweets(`id`),
 )

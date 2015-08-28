@@ -465,7 +465,6 @@ class MySQLInserter(object):
 			"user_profile_text_color": user.get("profile_text_color"),
 			"user_profile_sidebar_border_color": user.get("profile_sidebar_border_color"),
 			"user_profile_background_color": user.get("profile_background_color"),
-			"user_profile_background_image_url_https": user.get("profile_background_image_url_https"),
 			"user_profile_link_color": user.get("profile_link_color"),
 			"user_profile_image_url": user.get("profile_image_url"),
 			"user_profile_banner_url": user.get("profile_banner_url"),
