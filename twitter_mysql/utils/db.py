@@ -46,11 +46,12 @@ def build_connection_from_configfile(configfile):
 		"database.database",
 		error_message="A database name must be specified in the config file.")
 	user = configfile.getValue("database.user", default="root")
+	port = configfile.getValue("database.port", default=3306)
 	password = configfile.getValue("database.password", default="")
 	charset = configfile.getValue("database.charset", default="utf8mb4")
 
 	# create connection
 	db = MySQLdb.connect(host, user, password, 
-			database, charset=charset, use_unicode=True)
+			database, port=port, charset=charset, use_unicode=True)
 
 	return db
