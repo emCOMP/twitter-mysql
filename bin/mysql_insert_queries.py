@@ -629,9 +629,9 @@ ts.`in_reply_to_status_id`,
 ts.`in_reply_to_user_id`,
 ts.`id`
 
-from oso3.tweet_snapshots ts
+from tweet_snapshots ts
 inner join (select ts1.tweet_id, max(ts1.snapshot_tweet_id) as max_snapshot_tweet_id
-	from oso3.tweet_snapshots ts1
+	from tweet_snapshots ts1
 	group by ts1.tweet_id) gts 
 on gts.tweet_id = ts.tweet_id and gts.max_snapshot_tweet_id = ts.snapshot_tweet_id;
 """
@@ -707,9 +707,9 @@ ts.`user_default_profile` as default_profile,
 ts.`user_is_translator` as is_translator,
 ts.`id`
 
-from oso3.tweet_snapshots ts
+from tweet_snapshots ts
 inner join (select ts1.user_id, max(ts1.snapshot_tweet_id) as max_snapshot_tweet_id
-	from oso3.tweet_snapshots ts1
+	from tweet_snapshots ts1
 	group by ts1.user_id) gts 
 on gts.user_id = ts.user_id and gts.max_snapshot_tweet_id = ts.snapshot_tweet_id;
 """
