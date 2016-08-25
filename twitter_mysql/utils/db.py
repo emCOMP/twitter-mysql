@@ -18,11 +18,9 @@ def add_db_args(parser):
 def get_db_password(args):
 	"""get db password from args or falls back to manual input with getpass."""
 	if args.password is None:
-		password = getpass.getpass("Enter password for %s@%s (%s) : "%(args.username, args.host, args.database))
-	else:
-		password = args.password
+		return getpass.getpass("Enter password for %s@%s (%s) : "%(args.username, args.host, args.database))
 
-	return password
+	return None
 
 def get_db_mysql_connection(args, password=None):
 	"""creates database connection from argparser args object. 
