@@ -79,10 +79,10 @@ insert into tweet_subset_tags (`subset_tag_id`, `tweet_id`)
 
 # insert relations 
 insert into user_subset_tags (`subset_tag_id`, `user_id`)
-	select @last_id_tweets_530slide as `subset_tag_id`, t.user_id as user_id
+	select @last_id_530slide_tag as `subset_tag_id`, t.user_id as user_id
     from tweets t 
 		inner join tweet_subset_tags twst on twst.tweet_id = t.id
-		where twst.subset_tag_id = @last_id_tweets_530slide
+		where twst.subset_tag_id = @last_id_530slide_tag
         group by user_id;
 
 
@@ -106,6 +106,25 @@ insert into user_subset_tags (`subset_tag_id`, `user_id`)
 		where twst.subset_tag_id = @last_id_osostrong_tag
         group by user_id;
 
+#
+# 530 or oso & slide
+#
+insert into subset_tags (`name`, `description`) values ('oso slide', 'all tweets and users that have slide plus either 530 or oso');
+set @last_id_slide_tag = (select last_insert_id());
+
+# insert relations where either of these words appear
+insert into tweet_subset_tags (`subset_tag_id`, `tweet_id`) 
+    select @last_id_slide_tag as `subset_tag_id`, t.id as tweet_id
+    from tweets t where t.text like '%oso%' and  t.text like '%slide%';
+
+
+# insert relations 
+insert into user_subset_tags (`subset_tag_id`, `user_id`)
+    select @last_id_slide_tag as `subset_tag_id`, t.user_id as user_id
+    from tweets t 
+        inner join tweet_subset_tags twst on twst.tweet_id = t.id
+        where twst.subset_tag_id = @last_id_slide_tag
+        group by user_id;
 
 
 
